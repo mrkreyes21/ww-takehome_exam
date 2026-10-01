@@ -37,6 +37,7 @@ struct SubmissionListView: View {
                         Image(systemName: viewModel.layoutMode == .list ? "tablecells" : "list.bullet")
                     }
                     .accessibilityLabel(viewModel.layoutMode == .list ? "Switch to Table View" : "Switch to List View")
+                    .accessibilityHint("Changes the submissions layout between list and spreadsheet table modes")
                 }
                 
                 // status filter menu
@@ -70,6 +71,7 @@ struct SubmissionListView: View {
                     } label: {
                         Label("Status Filter", systemImage: isStatusFiltered ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
                     }
+                    .accessibilityLabel("Filter by status")
                 }
                 
                 // sort menu
@@ -90,6 +92,7 @@ struct SubmissionListView: View {
                     } label: {
                         Image(systemName: "arrow.up.arrow.down")
                     }
+                    .accessibilityLabel("Sort options")
                 }
             }
             .refreshable {
@@ -127,12 +130,15 @@ struct SubmissionListView: View {
                 Section {
                     ForEach(filteredList) { submission in
                         ZStack {
-                            NavigationLink(destination: SubmissionDetailView(submission: submission)) {
+                            NavigationLink(destination: SubmissionDetailView(submission: submission, allSubmissions: viewModel.submissions)) {
                                 EmptyView()
                             }
                             .opacity(0)
                             
-                            SubmissionRowView(submission: submission)
+                            SubmissionRowView(
+                                submission: submission,
+                                duplicateMatch: viewModel.duplicateMatch(for: submission)
+                            )
                         }
                         .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
                         .listRowBackground(Color.clear)
@@ -150,13 +156,14 @@ struct SubmissionListView: View {
                                 }
                             }
                             .tint(reviewStore.isReviewed(submission) ? .orange : .green)
+                            .accessibilityLabel(reviewStore.isReviewed(submission) ? "Mark as unreviewed" : "Mark as reviewed")
                         }
                     }
                 } header: {
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Queue Entries")
-                                .font(.system(size: 16, weight: .bold))
+                                .font(.headline)
                                 .foregroundColor(.primary)
                             
                             Text("\(filteredList.count) \(filteredList.count == 1 ? "record" : "records") ready for triage")
@@ -178,6 +185,7 @@ struct SubmissionListView: View {
                                     .font(.caption.weight(.semibold))
                                     .foregroundColor(.blue)
                             }
+                            .accessibilityLabel("Clear active filter")
                         } else {
                             Text("\(filteredList.count) TOTAL")
                                 .font(.caption.weight(.heavy))
@@ -244,6 +252,7 @@ struct SubmissionListView: View {
                     }
                 }
                 .buttonStyle(.bordered)
+                .accessibilityLabel("Reset all filters")
             }
         }
         .frame(maxWidth: .infinity)
@@ -270,6 +279,7 @@ struct SubmissionListView: View {
                 viewModel.loadSubmissions()
             }
             .buttonStyle(.borderedProminent)
+            .accessibilityLabel("Retry loading submissions")
             
             Spacer()
         }

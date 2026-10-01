@@ -1,12 +1,20 @@
-
 import SwiftUI
 
 struct SubmissionDetailView: View {
     let submission: Submission
+    var allSubmissions: [Submission] = []
     @EnvironmentObject private var reviewStore: ReviewStore
     
     private var isReviewed: Bool {
         reviewStore.isReviewed(submission)
+    }
+    
+    private var duplicates: [Submission] {
+        submission.matchingDuplicates(in: allSubmissions)
+    }
+    
+    private var duplicateMatch: DuplicateMatch? {
+        submission.duplicateMatch(in: allSubmissions)
     }
     
     var body: some View {
@@ -46,8 +54,51 @@ struct SubmissionDetailView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(isReviewed ? .orange : .green)
+                    .accessibilityLabel(isReviewed ? "Mark submission as unreviewed" : "Mark submission as reviewed")
+                    .accessibilityHint("Double tap to toggle review state")
                 }
                 .padding(.vertical, 4)
+            }
+            
+            // likely duplicate alert banner
+            if let duplicate = duplicateMatch, !duplicates.isEmpty {
+                Section(header: Text("Duplicate Detection")) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text("Potential Duplicate (\(duplicate.reason))")
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundColor(.primary)
+                        }
+                        
+                        Text("This submission shares details with \(duplicates.count) other entry in the queue.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        Divider()
+                        
+                        ForEach(duplicates) { dup in
+                            NavigationLink(destination: SubmissionDetailView(submission: dup, allSubmissions: allSubmissions)) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(dup.name)
+                                            .font(.caption.bold())
+                                        Text(dup.formattedFullDate)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    
+                                    Spacer()
+                                    
+                                    StatusBadgeView(status: dup.effectiveStatus(in: reviewStore))
+                                }
+                                .padding(.vertical, 2)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
             }
             
             // message / request content
@@ -76,6 +127,7 @@ struct SubmissionDetailView: View {
                         if let emailUrl = URL(string: "mailto:\(email)") {
                             Link(email, destination: emailUrl)
                                 .font(.subheadline)
+                                .accessibilityLabel("Email: \(email)")
                         } else {
                             Text(email)
                                 .font(.subheadline)
@@ -93,6 +145,7 @@ struct SubmissionDetailView: View {
                         if let phoneUrl = URL(string: "tel:\(cleanPhone)") {
                             Link(phone, destination: phoneUrl)
                                 .font(.subheadline)
+                                .accessibilityLabel("Phone number: \(phone)")
                         } else {
                             Text(phone)
                                 .font(.subheadline)

@@ -16,7 +16,7 @@ struct DashboardSummaryView: View {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(currentDateString)
-                        .font(.system(size: 11, weight: .bold))
+                        .font(.caption2.weight(.bold))
                         .foregroundColor(.secondary)
                         .tracking(0.6)
                     
@@ -35,15 +35,16 @@ struct DashboardSummaryView: View {
                 if unreviewed > 0 {
                     HStack(spacing: 4) {
                         Image(systemName: "flame.fill")
-                            .font(.system(size: 10))
+                            .font(.caption2)
                         Text("\(unreviewed) ACTION REQUIRED")
-                            .font(.system(size: 10, weight: .heavy))
+                            .font(.caption2.weight(.heavy))
                     }
                     .foregroundColor(.white)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(Color(red: 0.95, green: 0.45, blue: 0.20))
                     .clipShape(Capsule())
+                    .accessibilityLabel("\(unreviewed) submissions requiring action")
                 }
             }
             .padding(.horizontal, 2)
@@ -53,17 +54,17 @@ struct DashboardSummaryView: View {
                 HStack(alignment: .center) {
                     VStack(alignment: .leading, spacing: 1) {
                         Text("QUEUE STATUS DISTRIBUTION")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(.caption2.weight(.bold))
                             .foregroundColor(.secondary)
                             .tracking(0.5)
                         
                         if case .status(let activeStatus) = viewModel.selectedStatusFilter {
                             HStack(spacing: 4) {
                                 Text("Filtered by")
-                                    .font(.system(size: 11))
+                                    .font(.caption)
                                     .foregroundColor(.secondary)
                                 Text(activeStatus.displayName)
-                                    .font(.system(size: 11, weight: .bold))
+                                    .font(.caption.weight(.bold))
                                     .foregroundColor(activeStatus.solidBadgeColor)
                                 Button {
                                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -71,13 +72,14 @@ struct DashboardSummaryView: View {
                                     }
                                 } label: {
                                     Image(systemName: "xmark.circle.fill")
-                                        .font(.system(size: 11))
+                                        .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
+                                .accessibilityLabel("Clear \(activeStatus.displayName) filter")
                             }
                         } else {
                             Text("\(viewModel.totalCount) submissions • \(viewModel.unreviewedCount(reviewStore: reviewStore)) pending")
-                                .font(.system(size: 11, weight: .medium))
+                                .font(.caption.weight(.medium))
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -178,7 +180,7 @@ struct DashboardSummaryView: View {
             }
         } label: {
             Text(title)
-                .font(.system(size: 10, weight: isSelected ? .bold : .medium))
+                .font(.caption2.weight(isSelected ? .bold : .medium))
                 .foregroundColor(isSelected ? .white : .secondary)
                 .padding(.horizontal, 7)
                 .padding(.vertical, 4)
@@ -188,6 +190,8 @@ struct DashboardSummaryView: View {
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Triage filter: \(title)")
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
     }
 }
 
@@ -206,6 +210,7 @@ private struct ProportionalStatusBar: View {
                     let count = viewModel.statusCount(for: status, reviewStore: reviewStore)
                     let ratio = CGFloat(count) / CGFloat(total)
                     let width = max((geometry.size.width - CGFloat(max(activeStatuses.count - 1, 0)) * 2.5) * ratio, 6)
+                    let percentage = Int(round(Double(count) / Double(total) * 100.0))
                     
                     let isSelected: Bool = {
                         if case .status(let selected) = viewModel.selectedStatusFilter, selected == status {
@@ -236,6 +241,9 @@ private struct ProportionalStatusBar: View {
                             .frame(width: width, height: 10)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(status.displayName): \(count) submissions, \(percentage) percent")
+                    .accessibilityHint("Double tap to filter submissions by \(status.displayName)")
+                    .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
                 }
             }
             .clipShape(Capsule())
@@ -266,11 +274,11 @@ private struct FilterPill: View {
                 }
                 
                 Text(title)
-                    .font(.system(size: 11, weight: isSelected ? .bold : .semibold))
+                    .font(.caption.weight(isSelected ? .bold : .semibold))
                     .foregroundColor(isSelected ? .white : .primary)
                 
                 Text("\(count)")
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
+                    .font(.caption2.weight(.bold))
                     .foregroundColor(isSelected ? .white.opacity(0.95) : .secondary)
                     .padding(.horizontal, 4)
                     .padding(.vertical, 1)
@@ -293,5 +301,9 @@ private struct FilterPill: View {
             .shadow(color: isSelected ? color.opacity(0.25) : Color.clear, radius: 4, x: 0, y: 2)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(title) filter")
+        .accessibilityValue("\(count) submissions")
+        .accessibilityHint("Double tap to toggle filter")
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : [.isButton])
     }
 }

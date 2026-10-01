@@ -59,8 +59,9 @@ struct SubmissionTableView: View {
     
     private func tableRow(for submission: Submission, isEven: Bool) -> some View {
         let isReviewed = reviewStore.isReviewed(submission)
+        let duplicateMatch = submission.duplicateMatch(in: submissions)
         
-        return NavigationLink(destination: SubmissionDetailView(submission: submission)) {
+        return NavigationLink(destination: SubmissionDetailView(submission: submission, allSubmissions: submissions)) {
             HStack(spacing: 0) {
                 // review toggle
                 Button {
@@ -69,12 +70,13 @@ struct SubmissionTableView: View {
                     }
                 } label: {
                     Image(systemName: isReviewed ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 18))
+                        .font(.title3)
                         .foregroundColor(isReviewed ? .green : .secondary.opacity(0.5))
                 }
                 .buttonStyle(.plain)
                 .frame(width: 65, alignment: .center)
                 .padding(.horizontal, 8)
+                .accessibilityLabel(isReviewed ? "Mark \(submission.name) as unreviewed" : "Mark \(submission.name) as reviewed")
                 
                 // status badge
                 HStack {
@@ -84,13 +86,21 @@ struct SubmissionTableView: View {
                 .frame(width: 115, alignment: .leading)
                 .padding(.horizontal, 8)
                 
-                // sender name
-                Text(submission.name)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-                    .frame(width: 160, alignment: .leading)
-                    .padding(.horizontal, 8)
+                // sender name & optional duplicate chip
+                HStack(spacing: 4) {
+                    Text(submission.name)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    if duplicateMatch != nil {
+                        Image(systemName: "doc.on.doc.fill")
+                            .font(.system(size: 9))
+                            .foregroundColor(.orange)
+                    }
+                }
+                .frame(width: 160, alignment: .leading)
+                .padding(.horizontal, 8)
                 
                 // phone
                 Text(submission.phone ?? "—")
