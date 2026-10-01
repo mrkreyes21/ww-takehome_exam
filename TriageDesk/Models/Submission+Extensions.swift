@@ -2,7 +2,7 @@ import SwiftUI
 
 extension SubmissionStatus: CaseIterable {
     public static var allCases: [SubmissionStatus] {
-        [.new, .open, .pending, .inReview, .closed, .unknown]
+        [.new, .open, .pending, .inReview, .closed, .reviewed, .unknown]
     }
     
     var displayName: String {
@@ -17,6 +17,8 @@ extension SubmissionStatus: CaseIterable {
             return "In Review"
         case .closed:
             return "Closed"
+        case .reviewed:
+            return "Reviewed"
         case .unknown:
             return "Unknown"
         }
@@ -34,6 +36,8 @@ extension SubmissionStatus: CaseIterable {
             return "eye"
         case .closed:
             return "checkmark.circle"
+        case .reviewed:
+            return "checkmark.circle.fill"
         case .unknown:
             return "questionmark.circle"
         }
@@ -50,6 +54,8 @@ extension SubmissionStatus: CaseIterable {
         case .inReview:
             return .indigo
         case .closed:
+            return .gray
+        case .reviewed:
             return .green
         case .unknown:
             return .secondary

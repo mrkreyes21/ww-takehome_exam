@@ -104,7 +104,7 @@ struct Submission: Identifiable, Codable {
 
 // status enum
 enum SubmissionStatus: String, Codable {
-    case new, open, pending, inReview, closed, unknown
+    case new, open, pending, inReview, closed, reviewed, unknown
     
     init(rawValue: String) {
         let cleaned = rawValue.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -114,6 +114,7 @@ enum SubmissionStatus: String, Codable {
         case "pending": self = .pending
         case "in review", "in_review": self = .inReview
         case "closed": self = .closed
+        case "reviewed": self = .reviewed
         default: self = .unknown
         }
     }
