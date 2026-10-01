@@ -157,6 +157,7 @@ Manual tests are required. Automated tests are optional. The test scenarios are 
     * *Complex Merge Conflict Resolution:* Generated stable local `UUID`s for list rendering safety while keeping remote ID tracking transparent.
 
 * **What would you improve with more time?**
+    * *Pagination & Infinite Scrolling:* Implement cursor-based or offset-based pagination to load submissions in bounded batches (e.g., 25–50 per page) with lazy loading to optimize memory usage and UI scrolling performance when queues scale to thousands of records.
     * *Batch Triage Operations:* Multi-select actions to review or reassign multiple submissions simultaneously.
     * *Export and Reporting:* Capabilities to export filtered triage queues to CSV or JSON formats.
     * *Advanced Multi-Attribute Filters:* Combining service tags, date ranges, and status filters into customizable presets.

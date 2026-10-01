@@ -21,7 +21,7 @@ A native, zero-dependency iOS operations triage application built with **Swift 5
 1. Clone or open the project folder in your terminal.
 2. Open the Xcode project:
    ```bash
-   open TriageDesk/TriageDesk.xcodeproj
+   open TriageDesk.xcodeproj
    ```
 3. In Xcode's top toolbar, select your desired run destination (e.g., **iPhone 15 Pro**, **iPhone 16**, or physical device running iOS 16+).
 4. Press **`Cmd + R`** (or click the **Run** button) to build and launch the application.
@@ -118,15 +118,17 @@ TriageDesk/
 
 If given additional time to extend this project, the following enhancements would be prioritized:
 
-1. **Remote Backend Sync & Real-Time Updates**:
+1. **Pagination & Infinite Scrolling**:
+   - Implement cursor-based or offset pagination to load submissions in bounded batches (e.g., 25–50 records per page) with lazy scrolling triggers, optimizing memory overhead and rendering performance as queue sizes grow.
+2. **Remote Backend Sync & Real-Time Updates**:
    - Replace local bundle JSON loading with a REST / GraphQL API client featuring background fetching and WebSocket sync for real-time multi-agent triage queues.
-2. **Batch Triage Operations**:
+3. **Batch Triage Operations**:
    - Multi-select mode allowing reviewers to select multiple submissions simultaneously to mark as reviewed, change status, or reassign.
-3. **Export & Reporting**:
+4. **Export & Reporting**:
    - Capability to export filtered triage queues and status distribution summaries into CSV or PDF reports.
-4. **Scalable Database Architecture**:
+5. **Scalable Database Architecture**:
    - Migrate from in-memory / `UserDefaults` storage to **SwiftData** / SQLite for handling datasets scaling to hundreds of thousands of records with indexing.
-5. **Advanced Multi-Dimensional Filtering**:
+6. **Advanced Multi-Dimensional Filtering**:
    - Combine custom date range pickers, service tag checkboxes, and keyword filters into reusable custom filter presets.
 
 ---
