@@ -31,7 +31,7 @@ struct SubmissionRowView: View {
             
             // middle row: service & formatted date
             HStack(spacing: 8) {
-                Label(submission.displayService, systemImage: "tag.fill")
+                Label(submission.displayService, systemImage: submission.serviceIcon)
                     .font(.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)

@@ -124,7 +124,7 @@ struct SubmissionDetailView: View {
             // Service & Form Metadata
             Section(header: Text("Submission Metadata")) {
                 HStack {
-                    Label("Requested Service", systemImage: "briefcase.fill")
+                    Label("Requested Service", systemImage: submission.serviceIcon)
                         .foregroundColor(.secondary)
                     Spacer()
                     Text(submission.displayService)

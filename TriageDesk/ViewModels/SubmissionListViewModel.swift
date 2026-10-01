@@ -122,7 +122,7 @@ final class SubmissionListViewModel: ObservableObject {
                 let nameMatch = submission.name.lowercased().contains(trimmedSearch)
                 let emailMatch = submission.email?.lowercased().contains(trimmedSearch) ?? false
                 let phoneMatch = submission.phone?.lowercased().contains(trimmedSearch) ?? false
-                let serviceMatch = submission.service?.lowercased().contains(trimmedSearch) ?? false
+                let serviceMatch = submission.displayService.lowercased().contains(trimmedSearch) || (submission.service?.lowercased().contains(trimmedSearch) ?? false)
                 let messageMatch = submission.message?.lowercased().contains(trimmedSearch) ?? false
                 let remoteIdMatch = submission.remoteId?.lowercased().contains(trimmedSearch) ?? false
                 return nameMatch || emailMatch || phoneMatch || serviceMatch || messageMatch || remoteIdMatch
