@@ -1,1 +1,0 @@
-# ww-takehome_exam

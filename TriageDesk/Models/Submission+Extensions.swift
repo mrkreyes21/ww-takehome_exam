@@ -61,6 +61,42 @@ extension SubmissionStatus: CaseIterable {
             return .secondary
         }
     }
+    
+    var capsuleTitle: String {
+        switch self {
+        case .new:
+            return "NEW"
+        case .open:
+            return "OPEN"
+        case .pending:
+            return "PENDING"
+        case .inReview:
+            return "IN REVIEW"
+        case .closed:
+            return "CLOSED"
+        case .reviewed:
+            return "REVIEWED"
+        case .unknown:
+            return "UNKNOWN"
+        }
+    }
+    
+    var solidBadgeColor: Color {
+        switch self {
+        case .new, .open:
+            return Color(red: 0.95, green: 0.42, blue: 0.42) // vibrant coral / salmon
+        case .pending:
+            return Color(red: 0.96, green: 0.58, blue: 0.20) // warm amber
+        case .inReview:
+            return Color(red: 0.45, green: 0.35, blue: 0.85) // purple / indigo
+        case .closed:
+            return Color(red: 0.45, green: 0.50, blue: 0.55) // slate
+        case .reviewed:
+            return Color(red: 0.10, green: 0.14, blue: 0.20) // dark navy / black
+        case .unknown:
+            return Color(red: 0.55, green: 0.60, blue: 0.65) // muted gray
+        }
+    }
 }
 
 extension Submission {
@@ -77,6 +113,22 @@ extension Submission {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
+        return formatter.string(from: submittedAt)
+    }
+    
+    var formattedTime: String {
+        guard let submittedAt = submittedAt else { return "12:00 AM" }
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter.string(from: submittedAt)
+    }
+    
+    var formattedShortTimeOrDate: String {
+        guard let submittedAt = submittedAt else { return "12:00 AM" }
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
         return formatter.string(from: submittedAt)
     }
     
@@ -135,5 +187,12 @@ extension Submission {
             return "Legacy"
         }
         return version
+    }
+    
+    func effectiveStatus(in reviewStore: ReviewStore) -> SubmissionStatus {
+        if reviewStore.isReviewed(self) {
+            return .reviewed
+        }
+        return self.status
     }
 }

@@ -80,7 +80,8 @@ struct SubmissionTableView: View {
                 
                 // 2. Status Badge
                 HStack {
-                    StatusBadgeView(status: submission.status)
+                    let currentStatus = isReviewed ? SubmissionStatus.reviewed : submission.status
+                    StatusBadgeView(status: currentStatus)
                 }
                 .frame(width: 115, alignment: .leading)
                 .padding(.horizontal, 8)

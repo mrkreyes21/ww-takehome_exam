@@ -2,48 +2,66 @@ import Foundation
 import Combine
 
 final class ReviewStore: ObservableObject {
-    // stores the keys for instant lookups
     @Published private(set) var reviewedKeys: Set<String> = []
+    @Published private(set) var unreviewedOverrides: Set<String> = []
     
     private let userDefaults: UserDefaults
-    private let storageKey: String
+    private let reviewedStorageKey: String
+    private let unreviewedStorageKey: String
     
-    init(userDefaults: UserDefaults = .standard, storageKey: String = "triagedesk.reviewed_submissions") {
+    init(
+        userDefaults: UserDefaults = .standard,
+        reviewedStorageKey: String = "triagedesk.reviewed_submissions",
+        unreviewedStorageKey: String = "triagedesk.unreviewed_overrides"
+    ) {
         self.userDefaults = userDefaults
-        self.storageKey = storageKey
-        self.loadReviewedKeys()
+        self.reviewedStorageKey = reviewedStorageKey
+        self.unreviewedStorageKey = unreviewedStorageKey
+        self.loadKeys()
     }
     
     func isReviewed(_ submission: Submission) -> Bool {
         let key = persistenceKey(for: submission)
-        return reviewedKeys.contains(key)
+        if unreviewedOverrides.contains(key) {
+            return false
+        }
+        return submission.status == .reviewed || reviewedKeys.contains(key)
     }
     
     func toggleReview(for submission: Submission) {
         let key = persistenceKey(for: submission)
-        if reviewedKeys.contains(key) {
+        if isReviewed(submission) {
             reviewedKeys.remove(key)
+            if submission.status == .reviewed {
+                unreviewedOverrides.insert(key)
+            }
         } else {
             reviewedKeys.insert(key)
+            unreviewedOverrides.remove(key)
         }
-        saveReviewedKeys()
+        saveKeys()
     }
     
     func markAsReviewed(_ submission: Submission) {
         let key = persistenceKey(for: submission)
         reviewedKeys.insert(key)
-        saveReviewedKeys()
+        unreviewedOverrides.remove(key)
+        saveKeys()
     }
     
     func markAsUnreviewed(_ submission: Submission) {
         let key = persistenceKey(for: submission)
         reviewedKeys.remove(key)
-        saveReviewedKeys()
+        if submission.status == .reviewed {
+            unreviewedOverrides.insert(key)
+        }
+        saveKeys()
     }
     
     func resetAllReviews() {
         reviewedKeys.removeAll()
-        saveReviewedKeys()
+        unreviewedOverrides.removeAll()
+        saveKeys()
     }
     
     func persistenceKey(for submission: Submission) -> String {
@@ -56,15 +74,21 @@ final class ReviewStore: ObservableObject {
         return "fallback_\(name)_\(timestamp)_\(message)"
     }
     
-    private func loadReviewedKeys() {
-        if let savedArray = userDefaults.stringArray(forKey: storageKey) {
-            self.reviewedKeys = Set(savedArray)
+    private func loadKeys() {
+        if let savedReviewed = userDefaults.stringArray(forKey: reviewedStorageKey) {
+            self.reviewedKeys = Set(savedReviewed)
         } else {
             self.reviewedKeys = []
         }
+        if let savedUnreviewed = userDefaults.stringArray(forKey: unreviewedStorageKey) {
+            self.unreviewedOverrides = Set(savedUnreviewed)
+        } else {
+            self.unreviewedOverrides = []
+        }
     }
     
-    private func saveReviewedKeys() {
-        userDefaults.set(Array(reviewedKeys), forKey: storageKey)
+    private func saveKeys() {
+        userDefaults.set(Array(reviewedKeys), forKey: reviewedStorageKey)
+        userDefaults.set(Array(unreviewedOverrides), forKey: unreviewedStorageKey)
     }
 }

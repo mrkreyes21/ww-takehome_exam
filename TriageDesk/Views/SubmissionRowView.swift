@@ -8,30 +8,20 @@ struct SubmissionRowView: View {
         reviewStore.isReviewed(submission)
     }
     
-    private var badgeTitle: String {
-        if isReviewed {
-            return "REVIEWED"
-        }
-        return submission.status.capsuleTitle
-    }
-    
-    private var badgeColor: Color {
-        if isReviewed {
-            return Color(red: 0.10, green: 0.14, blue: 0.20)
-        }
-        return submission.status.solidBadgeColor
+    private var currentStatus: SubmissionStatus {
+        isReviewed ? .reviewed : submission.status
     }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .center, spacing: 10) {
-                Text(badgeTitle)
+                Text(currentStatus.capsuleTitle)
                     .font(.system(size: 10, weight: .heavy, design: .rounded))
                     .tracking(0.6)
                     .foregroundColor(.white)
                     .frame(width: 84)
                     .frame(maxHeight: .infinity)
-                    .background(badgeColor)
+                    .background(currentStatus.solidBadgeColor)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                 
                 VStack(alignment: .leading, spacing: 2) {

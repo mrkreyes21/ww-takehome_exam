@@ -21,18 +21,8 @@ struct SubmissionDetailView: View {
                                 .foregroundColor(.primary)
                             
                             HStack(spacing: 8) {
-                                if isReviewed {
-                                    Text("REVIEWED")
-                                        .font(.system(size: 10, weight: .heavy, design: .rounded))
-                                        .tracking(0.5)
-                                        .foregroundColor(.white)
-                                        .frame(width: 84)
-                                        .padding(.vertical, 5)
-                                        .background(Color(red: 0.10, green: 0.14, blue: 0.20))
-                                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                                }
-                                
-                                StatusBadgeView(status: submission.status)
+                                let currentStatus = isReviewed ? SubmissionStatus.reviewed : submission.status
+                                StatusBadgeView(status: currentStatus)
                             }
                         }
                         
