@@ -1,6 +1,21 @@
-
 import Foundation
 import Combine
+
+enum ViewLayoutMode: String, CaseIterable, Identifiable {
+    case list = "List"
+    case table = "Table"
+    
+    var id: String { rawValue }
+    
+    var systemImage: String {
+        switch self {
+        case .list:
+            return "list.bullet"
+        case .table:
+            return "tablecells"
+        }
+    }
+}
 
 enum ReviewFilter: String, CaseIterable, Identifiable {
     case all = "All"
@@ -72,6 +87,7 @@ final class SubmissionListViewModel: ObservableObject {
     @Published var selectedStatusFilter: StatusFilter = .all
     @Published var selectedReviewFilter: ReviewFilter = .all
     @Published var selectedSortOption: SortOption = .newestFirst
+    @Published var layoutMode: ViewLayoutMode = .list
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
     

@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct SubmissionListView: View {
@@ -31,12 +30,28 @@ struct SubmissionListView: View {
                 } else if filteredList.isEmpty {
                     emptyStateView
                 } else {
-                    submissionListContent
+                    if viewModel.layoutMode == .list {
+                        submissionListContent
+                    } else {
+                        SubmissionTableView(submissions: filteredList)
+                    }
                 }
             }
             .navigationTitle("Triage Desk")
             .searchable(text: $viewModel.searchText, prompt: "Search by name, email, or message...")
             .toolbar {
+                // layout mode toggle (List <-> Table)
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.layoutMode = (viewModel.layoutMode == .list ? .table : .list)
+                        }
+                    } label: {
+                        Image(systemName: viewModel.layoutMode == .list ? "tablecells" : "list.bullet")
+                    }
+                    .accessibilityLabel(viewModel.layoutMode == .list ? "Switch to Table View" : "Switch to List View")
+                }
+                
                 // status filter menu
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
