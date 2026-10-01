@@ -167,7 +167,6 @@ struct DashboardSummaryView: View {
             )
             .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 2)
         }
-        .padding(.bottom, 4)
     }
     
     @ViewBuilder

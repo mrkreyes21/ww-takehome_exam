@@ -113,7 +113,7 @@ struct SubmissionListView: View {
             // dashboard summary
             Section {
                 DashboardSummaryView(viewModel: viewModel)
-                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 0, trailing: 16))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
             }
@@ -122,7 +122,7 @@ struct SubmissionListView: View {
             if filteredList.isEmpty {
                 Section {
                     emptyStateView
-                        .listRowInsets(EdgeInsets(top: 20, leading: 16, bottom: 20, trailing: 16))
+                        .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 20, trailing: 16))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 }
@@ -140,7 +140,7 @@ struct SubmissionListView: View {
                                 duplicateMatch: viewModel.duplicateMatch(for: submission)
                             )
                         }
-                        .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -193,8 +193,8 @@ struct SubmissionListView: View {
                         }
                     }
                     .padding(.horizontal, 4)
-                    .padding(.top, 4)
-                    .padding(.bottom, 6)
+                    .padding(.top, 0)
+                    .padding(.bottom, 2)
                 }
             }
         }
