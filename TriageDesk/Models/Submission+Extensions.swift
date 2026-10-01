@@ -95,10 +95,32 @@ extension Submission {
     }
     
     var displayService: String {
-        guard let service = service?.trimmingCharacters(in: .whitespacesAndNewlines), !service.isEmpty else {
+        guard let raw = service?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(), !raw.isEmpty else {
             return "General Inquiry"
         }
-        return service
+        
+        if raw.contains("web") {
+            return "Web Development"
+        } else if raw.contains("mobile") || raw.contains("app") || raw.contains("ios") || raw.contains("android") {
+            return "Mobile App Development"
+        } else if raw == "other" {
+            return "Other"
+        } else {
+            return service?.trimmingCharacters(in: .whitespacesAndNewlines).capitalized ?? "General Inquiry"
+        }
+    }
+    
+    var serviceIcon: String {
+        switch displayService {
+        case "Web Development":
+            return "globe"
+        case "Mobile App Development":
+            return "iphone"
+        case "Other":
+            return "ellipsis.circle"
+        default:
+            return "briefcase"
+        }
     }
     
     var displayMessage: String {
