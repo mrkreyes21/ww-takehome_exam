@@ -22,7 +22,6 @@ struct SubmissionTableView: View {
         #endif
     }
     
-    // MARK: - Sticky Table Header
     private var tableHeader: some View {
         HStack(spacing: 0) {
             headerCell("Action", width: 65, alignment: .center)
@@ -58,13 +57,12 @@ struct SubmissionTableView: View {
             .padding(.horizontal, 8)
     }
     
-    // MARK: - Table Row
     private func tableRow(for submission: Submission, isEven: Bool) -> some View {
         let isReviewed = reviewStore.isReviewed(submission)
         
         return NavigationLink(destination: SubmissionDetailView(submission: submission)) {
             HStack(spacing: 0) {
-                // 1. Review Toggle Button
+                // review toggle
                 Button {
                     withAnimation {
                         reviewStore.toggleReview(for: submission)
@@ -78,7 +76,7 @@ struct SubmissionTableView: View {
                 .frame(width: 65, alignment: .center)
                 .padding(.horizontal, 8)
                 
-                // 2. Status Badge
+                // status badge
                 HStack {
                     let currentStatus = isReviewed ? SubmissionStatus.reviewed : submission.status
                     StatusBadgeView(status: currentStatus)
@@ -86,7 +84,7 @@ struct SubmissionTableView: View {
                 .frame(width: 115, alignment: .leading)
                 .padding(.horizontal, 8)
                 
-                // 3. Sender Name
+                // sender name
                 Text(submission.name)
                     .font(.subheadline.weight(.medium))
                     .foregroundColor(.primary)
@@ -94,7 +92,7 @@ struct SubmissionTableView: View {
                     .frame(width: 160, alignment: .leading)
                     .padding(.horizontal, 8)
                 
-                // 4. Phone
+                // phone
                 Text(submission.phone ?? "—")
                     .font(.caption)
                     .foregroundColor(submission.phone != nil ? .primary : .secondary)
@@ -102,7 +100,7 @@ struct SubmissionTableView: View {
                     .frame(width: 145, alignment: .leading)
                     .padding(.horizontal, 8)
                 
-                // 5. Email
+                // email
                 Text(submission.displayEmail ?? "—")
                     .font(.caption)
                     .foregroundColor(submission.displayEmail != nil ? .blue : .secondary)
@@ -110,7 +108,7 @@ struct SubmissionTableView: View {
                     .frame(width: 185, alignment: .leading)
                     .padding(.horizontal, 8)
                 
-                // 6. Service
+                // service
                 Text(submission.displayService)
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -118,7 +116,7 @@ struct SubmissionTableView: View {
                     .frame(width: 150, alignment: .leading)
                     .padding(.horizontal, 8)
                 
-                // 7. Submitted Date
+                // date
                 Text(submission.formattedDate)
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -126,7 +124,7 @@ struct SubmissionTableView: View {
                     .frame(width: 125, alignment: .leading)
                     .padding(.horizontal, 8)
                 
-                // 8. Remote ID
+                // remote id
                 Text(submission.remoteId ?? "—")
                     .font(.caption.monospaced())
                     .foregroundColor(.secondary)
@@ -134,7 +132,7 @@ struct SubmissionTableView: View {
                     .frame(width: 85, alignment: .leading)
                     .padding(.horizontal, 8)
                 
-                // 9. Form Version
+                // version
                 Text(submission.displayFormVersion)
                     .font(.caption)
                     .foregroundColor(.secondary)

@@ -11,36 +11,23 @@ struct SubmissionListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // all / unreviewed / reviewed
-                Picker("Review Filter", selection: $viewModel.selectedReviewFilter) {
-                    ForEach(ReviewFilter.allCases) { filter in
-                        Text(filterLabel(for: filter)).tag(filter)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.vertical, 8)
-                
-                // content view
                 if viewModel.isLoading {
                     ProgressView("Loading submissions...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let errorMessage = viewModel.errorMessage {
                     errorStateView(message: errorMessage)
-                } else if filteredList.isEmpty {
-                    emptyStateView
                 } else {
                     if viewModel.layoutMode == .list {
                         submissionListContent
                     } else {
-                        SubmissionTableView(submissions: filteredList)
+                        submissionTableContent
                     }
                 }
             }
             .navigationTitle("Triage Desk")
             .searchable(text: $viewModel.searchText, prompt: "Search by name, email, or message...")
             .toolbar {
-                // layout mode toggle (List <-> Table)
+                // layout mode toggle
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         withAnimation(.easeInOut(duration: 0.2)) {
@@ -118,52 +105,89 @@ struct SubmissionListView: View {
         return true
     }
     
-    private func filterLabel(for filter: ReviewFilter) -> String {
-        switch filter {
-        case .all:
-            return "All (\(viewModel.totalCount))"
-        case .unreviewedOnly:
-            return "Pending (\(viewModel.unreviewedCount(reviewStore: reviewStore)))"
-        case .reviewedOnly:
-            return "Reviewed (\(viewModel.reviewedCount(reviewStore: reviewStore)))"
-        }
-    }
-    
     private var submissionListContent: some View {
         List {
+            // dashboard summary
             Section {
-                ForEach(filteredList) { submission in
-                    ZStack {
-                        NavigationLink(destination: SubmissionDetailView(submission: submission)) {
-                            EmptyView()
-                        }
-                        .opacity(0)
-                        
-                        SubmissionRowView(submission: submission)
-                    }
-                    .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                DashboardSummaryView(viewModel: viewModel)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button {
-                            withAnimation {
-                                reviewStore.toggleReview(for: submission)
-                            }
-                        } label: {
-                            if reviewStore.isReviewed(submission) {
-                                Label("Unreview", systemImage: "arrow.uturn.backward.circle")
-                            } else {
-                                Label("Review", systemImage: "checkmark.circle.fill")
-                            }
-                        }
-                        .tint(reviewStore.isReviewed(submission) ? .orange : .green)
-                    }
+            }
+            
+            // queue entries
+            if filteredList.isEmpty {
+                Section {
+                    emptyStateView
+                        .listRowInsets(EdgeInsets(top: 20, leading: 16, bottom: 20, trailing: 16))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                 }
-            } header: {
-                Text("\(filteredList.count) \(filteredList.count == 1 ? "submission" : "submissions")")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            } else {
+                Section {
+                    ForEach(filteredList) { submission in
+                        ZStack {
+                            NavigationLink(destination: SubmissionDetailView(submission: submission)) {
+                                EmptyView()
+                            }
+                            .opacity(0)
+                            
+                            SubmissionRowView(submission: submission)
+                        }
+                        .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button {
+                                withAnimation {
+                                    reviewStore.toggleReview(for: submission)
+                                }
+                            } label: {
+                                if reviewStore.isReviewed(submission) {
+                                    Label("Unreview", systemImage: "arrow.uturn.backward.circle")
+                                } else {
+                                    Label("Review", systemImage: "checkmark.circle.fill")
+                                }
+                            }
+                            .tint(reviewStore.isReviewed(submission) ? .orange : .green)
+                        }
+                    }
+                } header: {
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Queue Entries")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(.primary)
+                            
+                            Text("\(filteredList.count) \(filteredList.count == 1 ? "record" : "records") ready for triage")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        if isStatusFiltered || viewModel.selectedReviewFilter != .all || !viewModel.searchText.isEmpty {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    viewModel.selectedStatusFilter = .all
+                                    viewModel.selectedReviewFilter = .all
+                                    viewModel.searchText = ""
+                                }
+                            } label: {
+                                Text("Clear Filter")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundColor(.blue)
+                            }
+                        } else {
+                            Text("\(filteredList.count) TOTAL")
+                                .font(.caption.weight(.heavy))
+                                .foregroundColor(.secondary)
+                        }
+                    }
                     .padding(.horizontal, 4)
+                    .padding(.top, 4)
+                    .padding(.bottom, 6)
+                }
             }
         }
         .listStyle(.plain)
@@ -174,11 +198,32 @@ struct SubmissionListView: View {
         #endif
     }
     
+    private var submissionTableContent: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                DashboardSummaryView(viewModel: viewModel)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 6)
+                
+                if filteredList.isEmpty {
+                    emptyStateView
+                        .padding(.top, 24)
+                } else {
+                    SubmissionTableView(submissions: filteredList)
+                }
+            }
+        }
+        #if os(iOS)
+        .background(Color(UIColor.systemGroupedBackground))
+        #else
+        .background(Color(NSColor.windowBackgroundColor))
+        #endif
+    }
+    
     private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Spacer()
+        VStack(spacing: 14) {
             Image(systemName: "tray")
-                .font(.system(size: 48))
+                .font(.system(size: 44))
                 .foregroundColor(.secondary)
             
             Text("No Submissions Found")
@@ -192,16 +237,17 @@ struct SubmissionListView: View {
             
             if !viewModel.searchText.isEmpty || isStatusFiltered || viewModel.selectedReviewFilter != .all {
                 Button("Reset Filters") {
-                    viewModel.searchText = ""
-                    viewModel.selectedStatusFilter = .all
-                    viewModel.selectedReviewFilter = .all
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.searchText = ""
+                        viewModel.selectedStatusFilter = .all
+                        viewModel.selectedReviewFilter = .all
+                    }
                 }
                 .buttonStyle(.bordered)
             }
-            
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 32)
     }
     
     private func errorStateView(message: String) -> some View {

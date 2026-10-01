@@ -115,7 +115,7 @@ final class SubmissionListViewModel: ObservableObject {
     func filteredSubmissions(reviewStore: ReviewStore) -> [Submission] {
         var result = submissions
         
-        // 1. Text Search Filter (name, email, phone, service, message, remoteId)
+        // search filter
         let trimmedSearch = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if !trimmedSearch.isEmpty {
             result = result.filter { submission in
@@ -129,12 +129,12 @@ final class SubmissionListViewModel: ObservableObject {
             }
         }
         
-        // 2. Status Filter
+        // status filter
         if case .status(let targetStatus) = selectedStatusFilter {
-            result = result.filter { $0.status == targetStatus }
+            result = result.filter { $0.effectiveStatus(in: reviewStore) == targetStatus }
         }
         
-        // 3. Review State Filter
+        // review filter
         switch selectedReviewFilter {
         case .all:
             break
@@ -144,7 +144,7 @@ final class SubmissionListViewModel: ObservableObject {
             result = result.filter { reviewStore.isReviewed($0) }
         }
         
-        // 4. Sorting
+        // sort options
         switch selectedSortOption {
         case .newestFirst:
             result.sort { ($0.submittedAt ?? .distantPast) > ($1.submittedAt ?? .distantPast) }
@@ -157,6 +157,10 @@ final class SubmissionListViewModel: ObservableObject {
         }
         
         return result
+    }
+    
+    func statusCount(for status: SubmissionStatus, reviewStore: ReviewStore) -> Int {
+        submissions.filter { $0.effectiveStatus(in: reviewStore) == status }.count
     }
     
     func unreviewedCount(reviewStore: ReviewStore) -> Int {
