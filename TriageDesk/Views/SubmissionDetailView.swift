@@ -11,7 +11,7 @@ struct SubmissionDetailView: View {
     
     var body: some View {
         List {
-            // Status & Triage Action Banner
+            // status & triage action banner
             Section {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
@@ -21,20 +21,18 @@ struct SubmissionDetailView: View {
                                 .foregroundColor(.primary)
                             
                             HStack(spacing: 8) {
-                                StatusBadgeView(status: submission.status)
-                                
                                 if isReviewed {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                        Text("Reviewed")
-                                    }
-                                    .font(.caption2.weight(.semibold))
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(Color.green.opacity(0.15))
-                                    .foregroundColor(.green)
-                                    .clipShape(Capsule())
+                                    Text("REVIEWED")
+                                        .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                        .tracking(0.5)
+                                        .foregroundColor(.white)
+                                        .frame(width: 84)
+                                        .padding(.vertical, 5)
+                                        .background(Color(red: 0.10, green: 0.14, blue: 0.20))
+                                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 }
+                                
+                                StatusBadgeView(status: submission.status)
                             }
                         }
                         
@@ -62,7 +60,7 @@ struct SubmissionDetailView: View {
                 .padding(.vertical, 4)
             }
             
-            // Message / Request Content
+            // message / request content
             Section(header: Text("Inquiry Message")) {
                 if let message = submission.message?.trimmingCharacters(in: .whitespacesAndNewlines), !message.isEmpty {
                     Text(message)
@@ -78,7 +76,7 @@ struct SubmissionDetailView: View {
                 }
             }
             
-            // Contact Information
+            // contact information
             Section(header: Text("Contact Details")) {
                 if let email = submission.displayEmail {
                     HStack {
@@ -121,7 +119,7 @@ struct SubmissionDetailView: View {
                 }
             }
             
-            // Service & Form Metadata
+            // service & form metadata
             Section(header: Text("Submission Metadata")) {
                 HStack {
                     Label("Requested Service", systemImage: submission.serviceIcon)

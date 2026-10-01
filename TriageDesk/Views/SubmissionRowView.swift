@@ -8,82 +8,154 @@ struct SubmissionRowView: View {
         reviewStore.isReviewed(submission)
     }
     
+    private var badgeTitle: String {
+        if isReviewed {
+            return "REVIEWED"
+        }
+        return submission.status.capsuleTitle
+    }
+    
+    private var badgeColor: Color {
+        if isReviewed {
+            return Color(red: 0.10, green: 0.14, blue: 0.20)
+        }
+        return submission.status.solidBadgeColor
+    }
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // header row: name, status badge, reviewed checkmark
-            HStack(alignment: .center, spacing: 8) {
-                if isReviewed {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .center, spacing: 10) {
+                Text(badgeTitle)
+                    .font(.system(size: 10, weight: .heavy, design: .rounded))
+                    .tracking(0.6)
+                    .foregroundColor(.white)
+                    .frame(width: 84)
+                    .frame(maxHeight: .infinity)
+                    .background(badgeColor)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(submission.name)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    if let email = submission.displayEmail {
+                        Text(email)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    } else if let phone = submission.displayPhone {
+                        Text(phone)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.vertical, 10)
+                
+                Spacer(minLength: 4)
+                
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(submission.formattedDate)
+                        .font(.system(size: 12, weight: .semibold))
+                        #if os(iOS)
+                        .foregroundColor(Color(UIColor.secondaryLabel))
+                        #else
+                        .foregroundColor(Color(NSColor.secondaryLabelColor))
+                        #endif
+                    
+                    Text(submission.formattedTime)
+                        .font(.system(size: 11, weight: .regular))
+                        #if os(iOS)
+                        .foregroundColor(Color(UIColor.tertiaryLabel))
+                        #else
+                        .foregroundColor(Color(NSColor.tertiaryLabelColor))
+                        #endif
+                }
+                .padding(.vertical, 10)
+                .padding(.trailing, 14)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            #if os(iOS)
+            .background(Color(UIColor.tertiarySystemGroupedBackground))
+            #else
+            .background(Color(NSColor.controlBackgroundColor).opacity(0.6))
+            #endif
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+            )
+            
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    HStack(spacing: 4) {
+                        Image(systemName: submission.serviceIcon)
+                            .font(.system(size: 11))
+                        Text(submission.displayService)
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.secondary.opacity(0.1))
+                    .clipShape(Capsule())
+                    
+                    if let phone = submission.displayPhone, submission.displayEmail != nil {
+                        HStack(spacing: 4) {
+                            Image(systemName: "phone.fill")
+                                .font(.system(size: 9))
+                            Text(phone)
+                                .font(.caption)
+                        }
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.secondary.opacity(0.08))
+                        .clipShape(Capsule())
+                    }
+                    
+                    Spacer()
+                }
+                
+                if let message = submission.message?.trimmingCharacters(in: .whitespacesAndNewlines), !message.isEmpty {
+                    Text(message)
                         .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
                 }
-                
-                Text(submission.name)
-                    .font(.headline)
-                    .lineLimit(1)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                // status pill
-                StatusBadgeView(status: submission.status)
             }
-            
-            // middle row: service & formatted date
-            HStack(spacing: 8) {
-                Label(submission.displayService, systemImage: submission.serviceIcon)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                
-                Spacer()
-                
-                Label(submission.formattedDate, systemImage: "calendar")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            // preview of message if available
-            if let message = submission.message?.trimmingCharacters(in: .whitespacesAndNewlines), !message.isEmpty {
-                Text(message)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-            }
+            .padding(.horizontal, 14)
+            .padding(.bottom, 14)
         }
-        .padding(.vertical, 4)
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button {
-                withAnimation {
-                    reviewStore.toggleReview(for: submission)
-                }
-            } label: {
-                if isReviewed {
-                    Label("Unreview", systemImage: "arrow.uturn.backward.circle")
-                } else {
-                    Label("Review", systemImage: "checkmark.circle.fill")
-                }
-            }
-            .tint(isReviewed ? .orange : .green)
-        }
+        #if os(iOS)
+        .background(Color(UIColor.secondarySystemGroupedBackground))
+        #else
+        .background(Color(NSColor.controlBackgroundColor))
+        #endif
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
     }
 }
 
 struct StatusBadgeView: View {
     let status: SubmissionStatus
+    var isSolid: Bool = true
     
     var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: status.systemImage)
-                .font(.system(size: 9, weight: .bold))
-            Text(status.displayName)
-                .font(.caption2.weight(.semibold))
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(status.tintColor.opacity(0.15))
-        .foregroundColor(status.tintColor)
-        .clipShape(Capsule())
+        Text(status.capsuleTitle)
+            .font(.system(size: 10, weight: .heavy, design: .rounded))
+            .tracking(0.5)
+            .foregroundColor(isSolid ? .white : status.tintColor)
+            .frame(width: 84)
+            .padding(.vertical, 5)
+            .background(isSolid ? status.solidBadgeColor : status.tintColor.opacity(0.15))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }

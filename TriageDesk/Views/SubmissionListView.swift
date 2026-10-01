@@ -133,20 +133,44 @@ struct SubmissionListView: View {
         List {
             Section {
                 ForEach(filteredList) { submission in
-                    NavigationLink(destination: SubmissionDetailView(submission: submission)) {
+                    ZStack {
+                        NavigationLink(destination: SubmissionDetailView(submission: submission)) {
+                            EmptyView()
+                        }
+                        .opacity(0)
+                        
                         SubmissionRowView(submission: submission)
+                    }
+                    .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button {
+                            withAnimation {
+                                reviewStore.toggleReview(for: submission)
+                            }
+                        } label: {
+                            if reviewStore.isReviewed(submission) {
+                                Label("Unreview", systemImage: "arrow.uturn.backward.circle")
+                            } else {
+                                Label("Review", systemImage: "checkmark.circle.fill")
+                            }
+                        }
+                        .tint(reviewStore.isReviewed(submission) ? .orange : .green)
                     }
                 }
             } header: {
                 Text("\(filteredList.count) \(filteredList.count == 1 ? "submission" : "submissions")")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .padding(.horizontal, 4)
             }
         }
+        .listStyle(.plain)
         #if os(iOS)
-        .listStyle(.insetGrouped)
+        .background(Color(UIColor.systemGroupedBackground))
         #else
-        .listStyle(.inset)
+        .background(Color(NSColor.windowBackgroundColor))
         #endif
     }
     
