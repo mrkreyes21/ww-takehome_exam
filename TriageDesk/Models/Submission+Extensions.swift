@@ -1,5 +1,10 @@
 import SwiftUI
 
+struct DuplicateMatch: Equatable, Hashable {
+    let reason: String
+    let matchingCount: Int
+}
+
 extension SubmissionStatus: CaseIterable {
     public static var allCases: [SubmissionStatus] {
         [.new, .open, .pending, .inReview, .closed, .reviewed, .unknown]
@@ -84,17 +89,17 @@ extension SubmissionStatus: CaseIterable {
     var solidBadgeColor: Color {
         switch self {
         case .new, .open:
-            return Color(red: 0.95, green: 0.42, blue: 0.42) // vibrant coral / salmon
+            return Color(red: 0.95, green: 0.42, blue: 0.42)
         case .pending:
-            return Color(red: 0.96, green: 0.58, blue: 0.20) // warm amber
+            return Color(red: 0.96, green: 0.58, blue: 0.20)
         case .inReview:
-            return Color(red: 0.45, green: 0.35, blue: 0.85) // purple / indigo
+            return Color(red: 0.45, green: 0.35, blue: 0.85)
         case .closed:
-            return Color(red: 0.45, green: 0.50, blue: 0.55) // slate
+            return Color(red: 0.45, green: 0.50, blue: 0.55)
         case .reviewed:
-            return Color(red: 0.10, green: 0.14, blue: 0.20) // dark navy / black
+            return Color(red: 0.10, green: 0.14, blue: 0.20)
         case .unknown:
-            return Color(red: 0.55, green: 0.60, blue: 0.65) // muted gray
+            return Color(red: 0.55, green: 0.60, blue: 0.65)
         }
     }
 }
@@ -194,5 +199,60 @@ extension Submission {
             return .reviewed
         }
         return self.status
+    }
+    
+    // duplicate detection helper comparing all submission fields except name
+    func isDuplicate(of other: Submission) -> Bool {
+        guard other.id != self.id else { return false }
+        
+        // must have valid contact details
+        guard self.displayEmail != nil || self.displayPhone != nil else { return false }
+        guard other.displayEmail != nil || other.displayPhone != nil else { return false }
+        
+        // 1. email matching
+        if let e1 = self.displayEmail?.lowercased(), let e2 = other.displayEmail?.lowercased() {
+            guard e1 == e2 else { return false }
+        } else if (self.displayEmail != nil) != (other.displayEmail != nil) {
+            return false
+        }
+        
+        // 2. phone matching
+        if let p1 = self.displayPhone, let p2 = other.displayPhone {
+            guard p1 == p2 else { return false }
+        } else if (self.displayPhone != nil) != (other.displayPhone != nil) {
+            return false
+        }
+        
+        // 3. service category matching
+        guard self.displayService == other.displayService else { return false }
+        
+        // 4. submission timestamp matching
+        if let d1 = self.submittedAt, let d2 = other.submittedAt {
+            guard abs(d1.timeIntervalSince(d2)) < 60 else { return false }
+        } else if (self.submittedAt != nil) != (other.submittedAt != nil) {
+            return false
+        }
+        
+        // 5. remote id matching (if present on both)
+        if let id1 = self.remoteId, let id2 = other.remoteId {
+            guard id1 == id2 else { return false }
+        }
+        
+        // 6. form version matching (if present on both)
+        if let f1 = self.formVersion, let f2 = other.formVersion {
+            guard f1 == f2 else { return false }
+        }
+        
+        return true
+    }
+    
+    func duplicateMatch(in allSubmissions: [Submission]) -> DuplicateMatch? {
+        let matches = matchingDuplicates(in: allSubmissions)
+        guard !matches.isEmpty else { return nil }
+        return DuplicateMatch(reason: "Identical Submission", matchingCount: matches.count + 1)
+    }
+    
+    func matchingDuplicates(in allSubmissions: [Submission]) -> [Submission] {
+        allSubmissions.filter { isDuplicate(of: $0) }
     }
 }

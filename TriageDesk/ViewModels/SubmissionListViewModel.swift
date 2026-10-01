@@ -159,6 +159,14 @@ final class SubmissionListViewModel: ObservableObject {
         return result
     }
     
+    func duplicateMatch(for submission: Submission) -> DuplicateMatch? {
+        submission.duplicateMatch(in: submissions)
+    }
+    
+    func matchingDuplicates(for submission: Submission) -> [Submission] {
+        submission.matchingDuplicates(in: submissions)
+    }
+    
     func statusCount(for status: SubmissionStatus, reviewStore: ReviewStore) -> Int {
         submissions.filter { $0.effectiveStatus(in: reviewStore) == status }.count
     }
@@ -173,5 +181,9 @@ final class SubmissionListViewModel: ObservableObject {
     
     var totalCount: Int {
         submissions.count
+    }
+    
+    var likelyDuplicateCount: Int {
+        submissions.filter { $0.duplicateMatch(in: submissions) != nil }.count
     }
 }
