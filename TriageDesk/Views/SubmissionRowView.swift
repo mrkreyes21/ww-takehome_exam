@@ -10,7 +10,7 @@ struct SubmissionRowView: View {
     }
     
     private var currentStatus: SubmissionStatus {
-        isReviewed ? .reviewed : submission.status
+        submission.effectiveStatus(in: reviewStore)
     }
     
     private var accessibilityDescription: String {
