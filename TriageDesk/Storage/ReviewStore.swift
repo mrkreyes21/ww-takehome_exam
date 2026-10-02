@@ -22,38 +22,63 @@ final class ReviewStore: ObservableObject {
     
     func isReviewed(_ submission: Submission) -> Bool {
         let key = persistenceKey(for: submission)
-        if unreviewedOverrides.contains(key) {
+        let legacyKey = submission.remoteId.map { "remote_\($0)" } ?? ""
+        
+        if unreviewedOverrides.contains(key) || (!legacyKey.isEmpty && unreviewedOverrides.contains(legacyKey)) {
             return false
         }
-        return submission.status == .reviewed || reviewedKeys.contains(key)
+        
+        if reviewedKeys.contains(key) || (!legacyKey.isEmpty && reviewedKeys.contains(legacyKey)) {
+            return true
+        }
+        
+        return submission.status == .reviewed
     }
     
     func toggleReview(for submission: Submission) {
         let key = persistenceKey(for: submission)
+        let legacyKey = submission.remoteId.map { "remote_\($0)" } ?? ""
+        
         if isReviewed(submission) {
             reviewedKeys.remove(key)
+            if !legacyKey.isEmpty { reviewedKeys.remove(legacyKey) }
+            
             if submission.status == .reviewed {
                 unreviewedOverrides.insert(key)
+                if !legacyKey.isEmpty { unreviewedOverrides.insert(legacyKey) }
             }
         } else {
             reviewedKeys.insert(key)
+            if !legacyKey.isEmpty { reviewedKeys.insert(legacyKey) }
+            
             unreviewedOverrides.remove(key)
+            if !legacyKey.isEmpty { unreviewedOverrides.remove(legacyKey) }
         }
         saveKeys()
     }
     
     func markAsReviewed(_ submission: Submission) {
         let key = persistenceKey(for: submission)
+        let legacyKey = submission.remoteId.map { "remote_\($0)" } ?? ""
+        
         reviewedKeys.insert(key)
+        if !legacyKey.isEmpty { reviewedKeys.insert(legacyKey) }
+        
         unreviewedOverrides.remove(key)
+        if !legacyKey.isEmpty { unreviewedOverrides.remove(legacyKey) }
         saveKeys()
     }
     
     func markAsUnreviewed(_ submission: Submission) {
         let key = persistenceKey(for: submission)
+        let legacyKey = submission.remoteId.map { "remote_\($0)" } ?? ""
+        
         reviewedKeys.remove(key)
+        if !legacyKey.isEmpty { reviewedKeys.remove(legacyKey) }
+        
         if submission.status == .reviewed {
             unreviewedOverrides.insert(key)
+            if !legacyKey.isEmpty { unreviewedOverrides.insert(legacyKey) }
         }
         saveKeys()
     }
@@ -66,7 +91,7 @@ final class ReviewStore: ObservableObject {
     
     func persistenceKey(for submission: Submission) -> String {
         if let remoteId = submission.remoteId, !remoteId.isEmpty {
-            return "remote_\(remoteId)"
+            return "remote_\(remoteId)_\(submission.name)"
         }
         let timestamp = submission.submittedAt?.timeIntervalSince1970 ?? 0
         let name = submission.name
