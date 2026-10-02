@@ -29,8 +29,7 @@ struct SubmissionDetailView: View {
                                 .foregroundColor(.primary)
                             
                             HStack(spacing: 8) {
-                                let currentStatus = isReviewed ? SubmissionStatus.reviewed : submission.status
-                                StatusBadgeView(status: currentStatus)
+                                StatusBadgeView(status: submission.effectiveStatus(in: reviewStore))
                             }
                         }
                         
