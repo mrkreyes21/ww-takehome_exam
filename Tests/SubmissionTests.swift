@@ -381,16 +381,22 @@ do {
     TestRunner.assertEqual(subEmpty.displayService, "General Inquiry", "Empty JSON {} defaults service to 'General Inquiry'")
     
     let jsonIntId = """
-    {"id": 1054, "name": "Int ID User"}
+    {"id": 1, "name": "Maria Santos"}
     """.data(using: .utf8)!
     let subIntId = try JSONDecoder().decode(Submission.self, from: jsonIntId)
-    TestRunner.assertEqual(subIntId.remoteId, "1054", "Integer id '1054' successfully coerced to string")
+    TestRunner.assertEqual(subIntId.remoteId, "1", "Integer id 1 (Record #1) successfully coerced to string '1'")
     
     let jsonStringId = """
-    {"id": "REC-9921", "name": "String ID User"}
+    {"id": "0017", "name": "Cha Villanueva"}
     """.data(using: .utf8)!
     let subStringId = try JSONDecoder().decode(Submission.self, from: jsonStringId)
-    TestRunner.assertEqual(subStringId.remoteId, "REC-9921", "String id 'REC-9921' decoded successfully")
+    TestRunner.assertEqual(subStringId.remoteId, "0017", "String id '0017' (Record #17) decoded with leading zeros preserved")
+    
+    let jsonNullId = """
+    {"id": null, "name": "No ID Person"}
+    """.data(using: .utf8)!
+    let subNullId = try JSONDecoder().decode(Submission.self, from: jsonNullId)
+    TestRunner.assertEqual(subNullId.remoteId, nil, "Null id (Record #30) safely decoded as nil")
 } catch {
     TestRunner.assert(false, "Malformed JSON decoding threw error: \(error)")
 }
