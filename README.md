@@ -63,7 +63,7 @@ TriageDesk/
 │   ├── Submission.swift                 # Core Codable model, SubmissionStatus enum & custom decoder
 │   └── Submission+Extensions.swift      # Normalization, phone E.164, & duplicate logic
 ├── Services/
-│   └── SubmissionService.swift          # JSON loading protocol & bundle implementation
+│   └── DataLoadService.swift            # JSON loading protocol & bundle implementation
 ├── Storage/
 │   └── ReviewStore.swift                # UserDefaults review state persistence (ObservableObject)
 ├── ViewModels/

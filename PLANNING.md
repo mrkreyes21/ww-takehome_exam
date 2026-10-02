@@ -97,7 +97,7 @@ I am implementing this using Swift and SwiftUI with an MVVM architecture. To ens
 
 * **Models:** `Submission`, `Submission+Extensions`
 * **Services & Storage:**
-* `SubmissionService` (`SubmissionServiceProtocol` / `BundleSubmissionService`): Reads and decodes `submissions.json`.
+* `DataLoadService` (`DataLoadServiceProtocol` / `DataLoadService`): Reads and decodes `submissions.json`.
 * `ReviewStore`: An `ObservableObject` managing reviewed IDs, backed by `UserDefaults`.
 
 * **ViewModels:**
