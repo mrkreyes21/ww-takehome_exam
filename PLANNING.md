@@ -29,16 +29,19 @@ I am implementing this using Swift and SwiftUI with an MVVM architecture. To ens
 
 - As a reviewer, I want to view a summarized list of all form submissions, so that I can quickly gauge the volume and basic details of incoming requests.
     - *Acceptance Criterion 1:* Reads `submissions.json` from the bundle and displays a list.
-    - *Acceptance Criterion 2:* Each row shows primary info (Name, Date, Status).
+    - *Acceptance Criterion 2:* Each row shows primary info (Name, Email, Message, Date, Status, Phone Number).
     - *Acceptance Criterion 3:* If data is missing or empty, it displays a sensible fallback instead of crashing.
 
-- As a reviewer, I want to search by name, email, or message, and filter by status (e.g., Unreviewed/Reviewed), so that I can focus only on the submissions I need to action.
-    - *Acceptance Criterion 1:* A native search bar filters the list based on the name or email field.
+- As a reviewer, I want to search by name, email, or message, and filter by status (e.g., New, Open, Pending, In Review, Closed, Reviewed, Unknown), so that I can focus only on the submissions I need to action.
+    - *Acceptance Criterion 1:* A native search bar filters the list based on the name, email, or message field.
     - *Acceptance Criterion 2:* A native toolbar menu allows me to filter submissions by their review status.
+    - *Acceptance Criterion 3:* The list UI updates immediately, and the state persists locally.
+    - *Acceptance Criterion 4:* If data is missing or empty, it displays a sensible fallback instead of crashing.
 
-- As a reviewer, I want to tap on a submission to see its full details, so that I can read all the inconsistent fields associated with that specific record.
-    - *Acceptance Criterion 1:* Tapping a row navigates to a Detail Screen.
+- As a reviewer, I want to tap on a submission to see its full details, so that I can read all the fields associated with that specific record.
+    - *Acceptance Criterion 1:* Tapping a row card navigates to a Detail Screen.
     - *Acceptance Criterion 2:* The detail screen renders all available data without breaking the layout on long strings.
+    - *Acceptance Criterion 3:* If data is missing or empty, it displays a sensible fallback instead of crashing.
 
 - As a reviewer, I want to mark a submission as "Reviewed", so that my team knows it has been handled.
     - *Acceptance Criterion 1:* A "Mark as Reviewed" action exists via native swipe actions on the list row and a toolbar button on the detail screen.
@@ -92,9 +95,9 @@ I am implementing this using Swift and SwiftUI with an MVVM architecture. To ens
 
 ### Architecture / components / modules
 
-* **Models:** `Submission`, `SubmissionStatus`
-* **Services:**
-* `DataLoadService`: Reads and decodes `submissions.json`.
+* **Models:** `Submission`, `Submission+Extensions`
+* **Services & Storage:**
+* `SubmissionService` (`SubmissionServiceProtocol` / `BundleSubmissionService`): Reads and decodes `submissions.json`.
 * `ReviewStore`: An `ObservableObject` managing reviewed IDs, backed by `UserDefaults`.
 
 * **ViewModels:**
@@ -134,7 +137,7 @@ Manual tests are required. Automated tests are optional. The test scenarios are 
 | **Scenario: Empty Object Fallbacks** | **Given** the JSON dataset contains completely empty objects (e.g., `{}`). **When** the user scrolls through the submission list. | **Then** the app should render the item using sensible fallbacks like "Unknown Sender". **And** the layout should not break or throw a fatal error. | Yes |
 | **Scenario: Review State Persistence** | **Given** the user marks a specific submission as "Reviewed". **When** the user force-quits the app and relaunches it. | **Then** that submission should remain visibly marked as "Reviewed" in the list view. | Yes |
 | **Scenario: Dynamic Type Accessibility** | **Given** the user increases the system text size via iOS Settings (Accessibility). **When** the user navigates through the app's list and detail screens. | **Then** all text elements should scale proportionally. **And** no text should be clipped, truncated without purpose, or rendered unreadable. | Yes |
-| **Scenario: Automated Unit Testing (Decoding, Normalization & Duplicates)** | **Given** the custom decoding engine processes irregular timestamps, Philippine phone formats, status enums, and duplicate contacts. **When** the unit test suite (`Tests/SubmissionTests.swift`) executes. | **Then** all 37 test cases must pass without assertions or crashes. | Yes |
+| **Scenario: Automated Unit Testing (Decoding, Normalization & Duplicates)** | **Given** the custom decoding engine processes irregular timestamps, Philippine phone formats, status enums, and duplicate contacts. **When** the unit test suite (`Tests/SubmissionTests.swift`) executes. | **Then** all 39 test cases must pass without assertions or crashes. | Yes |
 
 ---
 
@@ -157,6 +160,7 @@ Manual tests are required. Automated tests are optional. The test scenarios are 
     * *Complex Merge Conflict Resolution:* Generated stable local `UUID`s for list rendering safety while keeping remote ID tracking transparent.
 
 * **What would you improve with more time?**
+    * *On-Device AI / Apple Intelligence Triage:* Leverage Apple Intelligence and the native `NaturalLanguage` framework to provide on-device message summarization for lengthy submissions and automated urgency scoring (detecting high-priority intent such as *"tight timeline"*, *"security review needed"*, or *"urgent"*), surfacing critical inquiries to the top of the queue while preserving 100% customer privacy (zero external cloud data transfer).
     * *Pagination & Infinite Scrolling:* Implement cursor-based or offset-based pagination to load submissions in bounded batches (e.g., 25–50 per page) with lazy loading to optimize memory usage and UI scrolling performance when queues scale to thousands of records.
     * *Batch Triage Operations:* Multi-select actions to review or reassign multiple submissions simultaneously.
     * *Export and Reporting:* Capabilities to export filtered triage queues to CSV or JSON formats.

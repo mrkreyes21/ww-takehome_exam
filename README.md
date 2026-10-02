@@ -37,7 +37,7 @@ A zero-dependency standalone test suite is included at `Tests/SubmissionTests.sw
 ```bash
 swift Tests/SubmissionTests.swift
 ```
-*Expected Output: `38/38 unit tests passing with zero failures.`*
+*Expected Output: `39/39 unit tests passing with zero failures.`*
 
 ---
 
@@ -45,21 +45,28 @@ swift Tests/SubmissionTests.swift
 
 ```
 TriageDesk/
+├── App/
+│   ├── TriageDeskApp.swift              # App entry point & window group
+│   └── ContentView.swift                # Root container & splash controller
 ├── Models/
-│   ├── Submission.swift                 # Core Codable model with custom decoder
-│   ├── SubmissionStatus.swift           # Status enum & badge styling
+│   ├── Submission.swift                 # Core Codable model, SubmissionStatus enum & custom decoder
 │   └── Submission+Extensions.swift      # Normalization, phone E.164, & duplicate logic
 ├── Services/
-│   ├── DataLoadService.swift            # JSON loading protocol & bundle implementation
-│   └── ReviewStore.swift                # UserDefaults review state persistence
+│   └── SubmissionService.swift          # JSON loading protocol & bundle implementation
+├── Storage/
+│   └── ReviewStore.swift                # UserDefaults review state persistence (ObservableObject)
 ├── ViewModels/
 │   └── SubmissionListViewModel.swift    # Search, filter, layout & duplicate aggregation
-└── Views/
-    ├── SubmissionListView.swift         # Main navigation feed & search
-    ├── DashboardSummaryView.swift       # Proportional distribution bar & filter carousel
-    ├── SubmissionRowView.swift          # Capsule pill list row with swipe actions
-    ├── SubmissionDetailView.swift       # Full detail view with duplicate links
-    └── SubmissionTableView.swift        # High-density spreadsheet grid view
+├── Views/
+│   ├── SplashScreenView.swift           # Branded spring pop launch screen
+│   ├── SubmissionListView.swift         # Main navigation feed & search
+│   ├── DashboardSummaryView.swift       # Proportional distribution bar & filter carousel
+│   ├── SubmissionRowView.swift          # Capsule pill list row with swipe actions
+│   ├── SubmissionDetailView.swift       # Full detail view with duplicate links
+│   └── SubmissionTableView.swift        # High-density spreadsheet grid view
+├── Resources/
+│   └── submissions.json                 # Raw snapshot intake feed
+└── Assets.xcassets/                     # AppIcon, AppLogo & AccentColor sets
 ```
 
 1. **Resilient JSON Decoding Engine**:
@@ -91,7 +98,7 @@ TriageDesk/
 
 ---
 
-## 📌 Assumptions Made
+## Assumptions Made
 
 1. **UI Identity Safety**: Remote record IDs in irregular legacy datasets may be null, missing, or duplicated across records. To ensure absolute SwiftUI rendering safety, every `Submission` generates a stable local `UUID()` for `Identifiable` conformance while preserving the raw `remoteId` for display and duplicate tracking.
 2. **Review State Persistence**: Since no live backend database was provided, `UserDefaults` is assumed sufficient for local operations state. Pre-existing `"reviewed"` statuses in the dataset are respected automatically upon load while allowing explicit two-way review/unreview overrides.
@@ -101,7 +108,7 @@ TriageDesk/
 
 ---
 
-## 💬 What I Would Ask the Client Before Building for Production
+## What I Would Ask the Client Before Building for Production
 
 1. **Duplicate Criteria & Follow-up Inquiries**: What exact combination of attributes constitutes a true duplicate versus a customer legitimately submitting multiple separate inquiries across different days?
 2. **Card Information Density**: What minimal set of fields (e.g., sender name, status pill, service tag, 2-line message preview) do triage agents need on the queue cards to make swift routing decisions without visual clutter?
@@ -114,7 +121,7 @@ TriageDesk/
 
 ---
 
-## ⚠️ Known Limitations & Future Improvements
+## Known Limitations & Future Improvements
 
 If given additional time to extend this project, the following enhancements would be prioritized:
 
@@ -126,14 +133,16 @@ If given additional time to extend this project, the following enhancements woul
    - Multi-select mode allowing reviewers to select multiple submissions simultaneously to mark as reviewed, change status, or reassign.
 4. **Export & Reporting**:
    - Capability to export filtered triage queues and status distribution summaries into CSV or PDF reports.
-5. **Scalable Database Architecture**:
+5. **On-Device AI & Apple Intelligence Triage**:
+   - Utilize Apple Intelligence and the native `NaturalLanguage` framework for on-device 1-sentence message summarization and automated urgency scoring (e.g. detecting high-priority keywords like *"urgent"*, *"broken"*, or *"tight timeline"*), surfacing critical tickets to the top of the queue without transmitting sensitive customer PII to external servers.
+6. **Scalable Database Architecture**:
    - Migrate from in-memory / `UserDefaults` storage to **SwiftData** / SQLite for handling datasets scaling to hundreds of thousands of records with indexing.
-6. **Advanced Multi-Dimensional Filtering**:
+7. **Advanced Multi-Dimensional Filtering**:
    - Combine custom date range pickers, service tag checkboxes, and keyword filters into reusable custom filter presets.
 
 ---
 
-## 🤖 AI Tool Usage Disclosure & Validation
+## AI Tool Usage Disclosure & Validation
 
 In compliance with transparency guidelines, AI tools (**Gemini** and **Antigravity**) were utilized during development as follows:
 
@@ -145,14 +154,14 @@ In compliance with transparency guidelines, AI tools (**Gemini** and **Antigravi
 - **UI Prototyping & Boilerplate**: Used Gemini for initial view scaffolding, followed by extensive manual UI design refinement, layout customization, animation tuning, and accessibility enhancements.
 - **Documentation & README Drafting**: Utilized AI to assist in structuring, formatting, and drafting project documentation and the `README.md`.
 - **Validation Strategy**:
-  - **Automated Tests**: Verified all parsing, normalization, and duplicate detection rules with 38 unit tests via `swift Tests/SubmissionTests.swift`.
+  - **Automated Tests**: Verified all parsing, normalization, and duplicate detection rules with 39 unit tests via `swift Tests/SubmissionTests.swift`.
   - **Native Compilation**: Validated zero errors and zero warnings via `xcodebuild`.
   - **Dataset Stress Testing**: Verified stability against malformed JSON, empty objects, long text strings, and irregular formats.
   - **Accessibility & Device Testing**: Verified Dynamic Type font scaling and VoiceOver accessibility labels in the iOS Simulator.
 
 ---
 
-## 🎯 What to Focus on During Review
+## What to Focus on During Review
 
 When evaluating this project, please pay special attention to:
 
