@@ -4,6 +4,17 @@ A native, zero-dependency iOS operations triage application built with **Swift 5
 
 ---
 
+## 📱 App Previews
+
+| Dashboard | Submission Detail | Table View | Filtered Empty State |
+|:---:|:---:|:---:|:---:|
+| <img src="screenshots/dashboard.png" width="210" alt="Triage Queue & Dashboard" /> | <img src="screenshots/submission_details.png" width="210" alt="Submission Details" /> | <img src="screenshots/table_view.png" width="210" alt="Dense Table View" /> | <img src="screenshots/empty_state.png" width="210" alt="Empty State" /> |
+
+### 🎬 Video Walkthrough
+- **[Demo Walkthrough Video (Google Drive)](https://drive.google.com/file/d/1OhaLI32rARw3ALSgqHcqMkBAnGoUDdgV/view?usp=sharing)** 
+
+---
+
 ## Stack & Versions Built Against
 
 - **Language**: Swift 5.10
