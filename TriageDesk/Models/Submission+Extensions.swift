@@ -197,6 +197,8 @@ extension Submission {
     func effectiveStatus(in reviewStore: ReviewStore) -> SubmissionStatus {
         if reviewStore.isReviewed(self) {
             return .reviewed
+        } else if self.status == .reviewed {
+            return .pending
         }
         return self.status
     }
